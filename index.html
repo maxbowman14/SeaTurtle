@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sea Turtle Survival Adventure</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:linear-gradient(#6ec6ff,#0077b6);
+    color:white;
+    text-align:center;
+}
+
+#game{
+    max-width:900px;
+    margin:auto;
+    padding:20px;
+}
+
+h1{
+    margin-top:10px;
+}
+
+#stats{
+    display:flex;
+    justify-content:center;
+    gap:30px;
+    font-size:1.2em;
+    flex-wrap:wrap;
+}
+
+.bar{
+    width:300px;
+    height:25px;
+    background:#ddd;
+    margin:15px auto;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.fill{
+    width:0%;
+    height:100%;
+    background:gold;
+    transition:.5s;
+}
+
+#scene{
+    min-height:150px;
+    background:rgba(255,255,255,.15);
+    border-radius:15px;
+    padding:20px;
+    margin:20px 0;
+}
+
+#turtle{
+    font-size:80px;
+    transition:1s;
+}
+
+#question{
+    font-size:1.2em;
+    margin:20px;
+}
+
+.answers button{
+    display:block;
+    width:100%;
+    max-width:500px;
+    margin:10px auto;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#00e676;
+    cursor:pointer;
+    font-size:1em;
+}
+
+.answers button:hover{
+    background:#69f0ae;
+}
+
+#message{
+    font-size:1.2em;
+    min-height:40px;
+    margin:15px;
+}
+
+#nextBtn{
+    display:none;
+    padding:12px 25px;
+    font-size:1em;
+}
+
+#ending{
+    display:none;
+}
+
+.rank{
+    font-size:2em;
+    margin:15px;
+}
+</style>
+</head>
+<body>
+
+<div id="game">
+
+<h1>🐢 Sea Turtle Survival Adventure 🐢</h1>
+
+<div id="stats">
+<div>Shells: <span id="score">0</span></div>
+<div>Life Stage: <span id="stageDisplay">Egg</span></div>
+</div>
+
+<div class="bar">
+<div class="fill" id="progress"></div>
+</div>
+
+<div id="scene">
+<div id="turtle">🥚</div>
+<h2 id="sceneTitle">Nest on the Beach</h2>
+<p id="story">
+You are a sea turtle egg buried in warm sand. Answer questions correctly to survive and grow.
+</p>
+</div>
+
+<div id="question"></div>
+
+<div class="answers" id="answers"></div>
+
+<div id="message"></div>
+
+<button id="nextBtn" onclick="nextQuestion()">Continue Journey</button>
+
+<div id="ending">
+<h2>Mission Complete!</h2>
+<div class="rank" id="rank"></div>
+<p id="endingText"></p>
+<button onclick="location.reload()">Play Again</button>
+</div>
+
+</div>
+
+<script>
+
+const questions=[
+
+{
+stage:"Egg",
+icon:"🥚",
+title:"Nest on the Beach",
+question:"Sea turtles spend most of their lives...",
+answers:["On land","At sea","Underground","In rivers"],
+correct:1
+},
+
+{
+stage:"Egg",
+icon:"🥚",
+title:"Inside the Nest",
+question:"The sex of turtle hatchlings depends mainly on the nest's...",
+answers:["Size","Distance from water","Temperature","Color"],
+correct:2
+},
+
+{
+stage:"Hatching",
+icon:"🐣",
+title:"Breaking Out",
+question:"Female sea turtles leave the water to...",
+answers:["Eat plants","Sleep","Lay eggs","Find fish"],
+correct:2
+},
+
+{
+stage:"Hatching",
+icon:"🐣",
+title:"Race to the Ocean",
+question:"Sea turtles breathe using...",
+answers:["Gills","Lungs","Fins","Scales"],
+correct:1
+},
+
+{
+stage:"Juvenile",
+icon:"🐢",
+title:"Young Ocean Traveler",
+question:"Sea turtles have ______ instead of legs.",
+answers:["Claws","Paws","Flippers","Wings"],
+correct:2
+},
+
+{
+stage:"Juvenile",
+icon:"🐢",
+title:"Learning to Swim",
+question:"Sea turtles are...",
+answers:["Birds","Fish","Mammals","Reptiles"],
+correct:3
+},
+
+{
+stage:"Adult",
+icon:"🐢🌊",
+title:"Open Ocean",
+question:"Sea turtles are vertebrates. This means they have a...",
+answers:["Shell","Backbone","Fin","Tail"],
+correct:1
+},
+
+{
+stage:"Adult",
+icon:"🐢🌊",
+title:"Return to Nesting Beach",
+question:"Do all hatchlings survive long enough to breed?",
+answers:["Yes","No"],
+correct:1
+}
+
+];
+
+let current=0;
+let score=0;
+
+function loadQuestion(){
+
+let q=questions[current];
+
+document.getElementById("question").innerHTML=q.question;
+document.getElementById("sceneTitle").innerHTML=q.title;
+document.getElementById("stageDisplay").innerHTML=q.stage;
+document.getElementById("turtle").innerHTML=q.icon;
+
+let answers=document.getElementById("answers");
+answers.innerHTML="";
+
+q.answers.forEach((answer,index)=>{
+let btn=document.createElement("button");
+btn.innerHTML=answer;
+btn.onclick=()=>checkAnswer(index);
+answers.appendChild(btn);
+});
+
+let progress=(current/questions.length)*100;
+document.getElementById("progress").style.width=progress+"%";
+
+document.getElementById("message").innerHTML="";
+document.getElementById("nextBtn").style.display="none";
+}
+
+function checkAnswer(choice){
+
+let q=questions[current];
+let buttons=document.querySelectorAll(".answers button");
+
+buttons.forEach(btn=>btn.disabled=true);
+
+if(choice===q.correct){
+
+score+=5;
+
+document.getElementById("score").innerHTML=score;
+
+document.getElementById("message").innerHTML=
+"✅ Correct! You collected 5 shells and survived another danger.";
+
+}else{
+
+document.getElementById("message").innerHTML=
+"❌ Incorrect. The ocean is dangerous, but your turtle keeps going.";
+}
+
+document.getElementById("nextBtn").style.display="inline-block";
+}
+
+function nextQuestion(){
+
+current++;
+
+if(current>=questions.length){
+finishGame();
+return;
+}
+
+loadQuestion();
+}
+
+function finishGame(){
+
+document.getElementById("question").style.display="none";
+document.getElementById("answers").style.display="none";
+document.getElementById("nextBtn").style.display="none";
+document.getElementById("message").style.display="none";
+
+document.getElementById("progress").style.width="100%";
+
+let rank="";
+let ending="";
+
+if(score<15){
+
+rank="🐣 Hatchling";
+
+ending="You made it to the ocean, but many challenges remain.";
+
+}
+else if(score<30){
+
+rank="🌊 Ocean Explorer";
+
+ending="You survived the juvenile stage and learned the sea turtle life cycle.";
+
+}
+else{
+
+rank="🏆 MASTER TURTLE GUARDIAN";
+
+ending="Your turtle survived from egg to adult and returned to lay eggs on the beach, completing the life cycle.";
+}
+
+document.getElementById("ending").style.display="block";
+document.getElementById("rank").innerHTML=rank;
+document.getElementById("endingText").innerHTML=
+ending + "<br><br>Final Shell Score: <b>"+score+"</b>";
+
+document.getElementById("sceneTitle").innerHTML=
+"Life Cycle Complete!";
+
+document.getElementById("story").innerHTML=
+"🥚 → 🐣 → 🐢 → 🐢🌊";
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
